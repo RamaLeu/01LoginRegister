@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const app = require("./app");
-// const dotenv = require("dotenv");
-// dotenv.config();
+const dotenv = require("dotenv");
+dotenv.config();
 
 const DB =
   process.env.MONGO_DB;

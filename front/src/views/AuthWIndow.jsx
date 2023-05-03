@@ -1,9 +1,9 @@
-import React, {useState} from 'react'
+import React, {useEffect, useState} from 'react'
 import axios from 'axios';
 import {redirect, useNavigate} from "react-router-dom";
 import './styles/auth.css';
 
-function AuthWIndow() {
+function AuthWIndow({setUserData}) {
 
     const navigate = useNavigate();
     const URL = 'http://localhost:3001/api/v1/'
@@ -13,6 +13,7 @@ function AuthWIndow() {
 
     let [usernameState, setUsername] = useState('');
     let [passwordState, setPassword] = useState('');
+    let [rememberMeState, setRememberMe] = useState(false);
 
     let [regUsernameState, setRegUsername] = useState('');
     let [regPasswordState, setRegPassword] = useState('');
@@ -21,8 +22,39 @@ function AuthWIndow() {
 
     let [authError, setAuthError] = useState('');
 
+    useEffect(()=>{
+        const isRemembered = sessionStorage.getItem("remember_me");
+        if(isRemembered){
+            axios.post(URL + 'auth/remembered-login', {
+                isRemembered: isRemembered
+            }).then((response)=>{
+                console.log(response);
+                setUserData(response.data.data.user)
+                navigate('/main');
+            }).catch((err)=>{
+                console.log(err);
+            })
+        }
+    },[])
     function onLogin(e){
-        console.log(e);
+        e.preventDefault();
+        axios.post(URL + 'auth/login', {
+            "username": usernameState,
+            "password": passwordState
+        }).then((response)=>{
+            console.log(response);
+            setUserData(response.data.data.user)
+            if(rememberMeState){
+                console.log('is remembered');
+                sessionStorage.setItem("remember_me", "true");
+                navigate('/main');
+            }
+        }).catch((error)=>{
+            console.log(error);
+            if(error.response.data.status == 'fail'){
+                setAuthError(error.response.data.message);
+            }
+        })
 
 
 
@@ -47,7 +79,27 @@ function AuthWIndow() {
     };
 
     function onRegister(e){
-        console.log();
+        setAuthError('');
+        e.preventDefault();
+       console.log(regUsernameState);
+       console.log(regPasswordState);
+       console.log(regEmailState);
+       console.log(regRepeatPass);
+
+       if(regPasswordState != regRepeatPass){
+        setAuthError('Passwords do not match!');
+       }else{
+            axios.post(URL + 'auth/register', {
+                "username": regUsernameState,
+                "password": regPasswordState,
+                "email": regEmailState,
+            }).then((response)=>{
+                console.log(response);
+            }).catch((err)=>{
+                console.log(err);
+            })
+
+       }
 
 
 
@@ -91,6 +143,8 @@ function AuthWIndow() {
                     <input type="password" className='input-field' value={passwordState} onChange={(e)=>setPassword(e.target.value)} placeholder='password'>
                     
                     </input>
+                    <input type="checkbox" className="checkbox" value={rememberMeState} onChange={(e)=>setRememberMe(e.target.value)}/>
+                    <span>Remember me</span>
                     <input type="submit" className="submit-btn" value="Login"/>
                 </form>
             </div> : 

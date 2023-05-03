@@ -10,7 +10,7 @@ import AuthWIndow from './views/AuthWIndow';
 import MainPage from './views/MainPage';
 
 function App() {
-
+  const [userData, setUserData] = useState('');
   const router = createBrowserRouter([
     {
       path: '/',
@@ -18,11 +18,11 @@ function App() {
     },
     {
       path: '/auth',
-      element: <AuthWIndow/>
+      element: <AuthWIndow setUserData={setUserData}/>
     },
     {
       path: '/main',
-      element: <MainPage/>
+      element: <MainPage userData={userData}/>
     }
   ])
 
